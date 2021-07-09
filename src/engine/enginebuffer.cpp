@@ -1285,6 +1285,8 @@ void EngineBuffer::processSeek(bool paused) {
         }
         double requestedPosition = position;
         double syncPosition = m_pBpmControl->getBeatMatchPosition(position, true, true);
+        qDebug() << "queued" << queuedSeek.position.toEngineSamplePos()
+                 << "syncpos" << syncPosition;
         position = m_pLoopingControl->getSyncPositionInsideLoop(requestedPosition, syncPosition);
         if (kLogger.traceEnabled()) {
             kLogger.trace()
@@ -1456,14 +1458,10 @@ void EngineBuffer::slotEjectTrack(double v) {
 }
 
 double EngineBuffer::getExactPlayPos() const {
-    double visualPlayPos = getVisualPlayPos();
-    if (visualPlayPos > 0) {
-        return getVisualPlayPos() * getTrackSamples();
-    } else {
-        // Track was just loaded and the first buffer was not processed yet.
-        // assume it is at 0:00
+    if (!m_visualPlayPos->isValid()) {
         return 0.0;
     }
+    return m_visualPlayPos->getEnginePlayPos() * getTrackSamples();
 }
 
 double EngineBuffer::getVisualPlayPos() const {
