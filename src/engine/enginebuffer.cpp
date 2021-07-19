@@ -1286,8 +1286,6 @@ void EngineBuffer::processSeek(bool paused) {
         }
         double requestedPosition = position;
         double syncPosition = m_pBpmControl->getBeatMatchPosition(position, true, true);
-        qDebug() << "queued" << queuedSeek.position.toEngineSamplePos()
-                 << "syncpos" << syncPosition;
         position = m_pLoopingControl->getSyncPositionInsideLoop(requestedPosition, syncPosition);
         if (kLogger.traceEnabled()) {
             kLogger.trace()
