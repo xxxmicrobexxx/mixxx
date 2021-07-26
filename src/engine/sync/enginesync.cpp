@@ -83,7 +83,7 @@ void EngineSync::requestSyncMode(Syncable* pSyncable, SyncMode mode) {
     }
 
     // Second, figure out what Syncable should be used to initialize the leader
-    // parameters, if any. Usually this is the leader. (Note, that pointer might be null!)
+    // parameters, if any. Usually this is the new leader. (Note, that pointer might be null!)
     Syncable* pParamsSyncable = m_pLeaderSyncable;
     // But if we are newly leader, we need to match to some other deck.
     if (pSyncable == m_pLeaderSyncable && pSyncable != oldLeader) {

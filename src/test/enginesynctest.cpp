@@ -199,7 +199,7 @@ TEST_F(EngineSyncTest, SetLeaderSuccess) {
 
     auto pButtonLeaderSync1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
-    pButtonLeaderSync1->slotSet(static_cast<double>(SyncMode::LeaderExplicit));
+    pButtonLeaderSync1->set(static_cast<double>(SyncMode::LeaderExplicit));
     ProcessBuffer();
 
     // No tracks are playing and we have no beats, LeaderExplicit state is in stand-by
@@ -233,7 +233,7 @@ TEST_F(EngineSyncTest, SetLeaderSuccess) {
     EXPECT_TRUE(isFollower(m_sGroup2));
 
     // Now set channel 1 to follower, now all are followers, waiting for a tempo to adopt.
-    pButtonLeaderSync1->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonLeaderSync1->set(static_cast<double>(SyncMode::Follower));
     ProcessBuffer();
 
     EXPECT_TRUE(isFollower(m_sInternalClockGroup));
@@ -254,7 +254,7 @@ TEST_F(EngineSyncTest, ExplicitLeaderPersists) {
     auto pButtonLeaderSync1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
     ControlObject::getControl(ConfigKey(m_sGroup1, "play"))->set(1.0);
-    pButtonLeaderSync1->slotSet(static_cast<double>(SyncMode::LeaderExplicit));
+    pButtonLeaderSync1->set(static_cast<double>(SyncMode::LeaderExplicit));
     ProcessBuffer();
     // The sync lock should now be channel 1.
     EXPECT_TRUE(isExplicitLeader(m_sGroup1));
@@ -293,10 +293,10 @@ TEST_F(EngineSyncTest, SetLeaderWhilePlaying) {
     pButtonLeaderSync1->set(static_cast<double>(SyncMode::LeaderExplicit));
     auto pButtonLeaderSync2 =
             std::make_unique<ControlProxy>(m_sGroup2, "sync_mode");
-    pButtonLeaderSync2->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonLeaderSync2->set(static_cast<double>(SyncMode::Follower));
     auto pButtonLeaderSync3 =
             std::make_unique<ControlProxy>(m_sGroup3, "sync_mode");
-    pButtonLeaderSync3->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonLeaderSync3->set(static_cast<double>(SyncMode::Follower));
 
     ControlObject::getControl(ConfigKey(m_sGroup1, "play"))->set(1.0);
     ControlObject::getControl(ConfigKey(m_sGroup2, "play"))->set(1.0);
@@ -304,7 +304,7 @@ TEST_F(EngineSyncTest, SetLeaderWhilePlaying) {
 
     ProcessBuffer();
 
-    pButtonLeaderSync3->slotSet(static_cast<double>(SyncMode::LeaderExplicit));
+    pButtonLeaderSync3->set(static_cast<double>(SyncMode::LeaderExplicit));
 
     ProcessBuffer();
 
@@ -320,7 +320,7 @@ TEST_F(EngineSyncTest, SetEnabledBecomesLeader) {
     m_pTrack1->trySetBeats(pBeats1);
     auto pButtonLeaderSync1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
-    pButtonLeaderSync1->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonLeaderSync1->set(static_cast<double>(SyncMode::Follower));
     ProcessBuffer();
 
     EXPECT_TRUE(isSoftLeader(m_sGroup1));
@@ -330,13 +330,13 @@ TEST_F(EngineSyncTest, SetEnabledBecomesLeader) {
 TEST_F(EngineSyncTest, DisableInternalLeaderWhilePlaying) {
     auto pButtonLeaderSync = std::make_unique<ControlProxy>(
             m_sInternalClockGroup, "sync_leader");
-    pButtonLeaderSync->slotSet(1.0);
+    pButtonLeaderSync->set(1.0);
     auto pButtonSyncMode1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
-    pButtonSyncMode1->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonSyncMode1->set(static_cast<double>(SyncMode::Follower));
     auto pButtonSyncMode2 =
             std::make_unique<ControlProxy>(m_sGroup2, "sync_mode");
-    pButtonSyncMode2->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonSyncMode2->set(static_cast<double>(SyncMode::Follower));
     ProcessBuffer();
     // The sync lock should now be Internal.
     EXPECT_TRUE(isExplicitLeader(m_sInternalClockGroup));
@@ -353,7 +353,7 @@ TEST_F(EngineSyncTest, DisableInternalLeaderWhilePlaying) {
     ProcessBuffer();
 
     // Now unset Internal leader.
-    pButtonLeaderSync->slotSet(0.0);
+    pButtonLeaderSync->set(0.0);
     ProcessBuffer();
 
     // This is not allowed, Internal should still be leader.
@@ -368,7 +368,7 @@ TEST_F(EngineSyncTest, DisableSyncOnLeader) {
     m_pTrack1->trySetBeats(pBeats1);
     auto pButtonSyncMode1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
-    pButtonSyncMode1->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonSyncMode1->set(static_cast<double>(SyncMode::Follower));
 
     mixxx::BeatsPointer pBeats2 = BeatFactory::makeBeatGrid(
             m_pTrack2->getSampleRate(), mixxx::Bpm(130), mixxx::audio::kStartFramePos);
@@ -376,7 +376,7 @@ TEST_F(EngineSyncTest, DisableSyncOnLeader) {
     // Set deck two to explicit leader.
     auto pButtonSyncLeader2 =
             std::make_unique<ControlProxy>(m_sGroup2, "sync_leader");
-    pButtonSyncLeader2->slotSet(1.0);
+    pButtonSyncLeader2->set(1.0);
     ProcessBuffer();
     EXPECT_TRUE(isFollower(m_sGroup1));
     EXPECT_TRUE(isExplicitLeader(m_sGroup2));
@@ -391,7 +391,7 @@ TEST_F(EngineSyncTest, DisableSyncOnLeader) {
     // Unset enabled on channel2, it should work.
     auto pButtonSyncEnabled2 =
             std::make_unique<ControlProxy>(m_sGroup2, "sync_enabled");
-    pButtonSyncEnabled2->slotSet(0.0);
+    pButtonSyncEnabled2->set(0.0);
     ProcessBuffer();
     EXPECT_TRUE(isSoftLeader(m_sGroup1));
     EXPECT_EQ(0, ControlObject::getControl(ConfigKey(m_sGroup2, "sync_enabled"))->get());
@@ -406,7 +406,7 @@ TEST_F(EngineSyncTest, InternalLeaderSetFollowerSliderMoves) {
             std::make_unique<ControlProxy>(m_sInternalClockGroup, "bpm");
 
     pLeaderSyncSlider->set(100.0);
-    pButtonLeaderSyncInternal->slotSet(1);
+    pButtonLeaderSyncInternal->set(1);
 
     // Set the file bpm of channel 1 to 80 bpm.
     mixxx::BeatsPointer pBeats1 = BeatFactory::makeBeatGrid(
@@ -415,7 +415,7 @@ TEST_F(EngineSyncTest, InternalLeaderSetFollowerSliderMoves) {
 
     auto pButtonLeaderSync1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
-    pButtonLeaderSync1->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonLeaderSync1->set(static_cast<double>(SyncMode::Follower));
     ProcessBuffer();
 
     EXPECT_DOUBLE_EQ(getRateSliderValue(1.25),
@@ -549,20 +549,20 @@ TEST_F(EngineSyncTest, SetExplicitLeaderByLights) {
     ControlObject::set(ConfigKey(m_sGroup2, "play"), 1.0);
 
     // Set channel 1 to be explicit leader.
-    pButtonSyncLeader1->slotSet(1.0);
+    pButtonSyncLeader1->set(1.0);
     ProcessBuffer();
 
     // The sync lock should now be channel 1.
     EXPECT_TRUE(isExplicitLeader(m_sGroup1));
 
     // Set channel 2 to be follower.
-    pButtonSyncEnabled2->slotSet(1);
+    pButtonSyncEnabled2->set(1);
     ProcessBuffer();
 
     EXPECT_TRUE(isFollower(m_sGroup2));
 
     // Now set channel 2 to be leader.
-    pButtonSyncLeader2->slotSet(1);
+    pButtonSyncLeader2->set(1);
     ProcessBuffer();
 
     // Now channel 2 should be leader, and channel 1 should be a follower.
@@ -570,7 +570,7 @@ TEST_F(EngineSyncTest, SetExplicitLeaderByLights) {
     EXPECT_TRUE(isExplicitLeader(m_sGroup2));
 
     // Now back again.
-    pButtonSyncLeader1->slotSet(1);
+    pButtonSyncLeader1->set(1);
     ProcessBuffer();
 
     // Now channel 1 should be leader, and channel 2 should be a follower.
@@ -579,7 +579,7 @@ TEST_F(EngineSyncTest, SetExplicitLeaderByLights) {
 
     // Now set channel 1 to not-leader. The system will choose deck 2 as the next best
     // option for soft leader
-    pButtonSyncLeader1->slotSet(0);
+    pButtonSyncLeader1->set(0);
     ProcessBuffer();
 
     EXPECT_TRUE(isFollower(m_sInternalClockGroup));
@@ -594,16 +594,16 @@ TEST_F(EngineSyncTest, SetExplicitLeaderByLightsNoTracks) {
     auto pButtonSyncLeader1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_leader");
 
-    pButtonSyncLeader1->slotSet(1);
+    pButtonSyncLeader1->set(1);
 
     // Set channel 2 to be follower.
-    pButtonSyncEnabled2->slotSet(1);
+    pButtonSyncEnabled2->set(1);
 
     // Without a track loaded, deck 1 can't be an explicit leader.
     EXPECT_TRUE(isFollower(m_sGroup1));
     EXPECT_TRUE(isFollower(m_sGroup2));
 
-    pButtonSyncLeader1->slotSet(0);
+    pButtonSyncLeader1->set(0);
 
     EXPECT_TRUE(isFollower(m_sGroup1));
     EXPECT_TRUE(isFollower(m_sGroup2));
@@ -656,10 +656,10 @@ TEST_F(EngineSyncTest, RateChangeTestWeirdOrder) {
     // This is like the test above, but the user loads the track after the slider has been tweaked.
     auto pButtonLeaderSync1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
-    pButtonLeaderSync1->slotSet(static_cast<double>(SyncMode::LeaderExplicit));
+    pButtonLeaderSync1->set(static_cast<double>(SyncMode::LeaderExplicit));
     auto pButtonLeaderSync2 =
             std::make_unique<ControlProxy>(m_sGroup2, "sync_mode");
-    pButtonLeaderSync2->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonLeaderSync2->set(static_cast<double>(SyncMode::Follower));
     ProcessBuffer();
 
     // Set the file bpm of channel 1 to 160bpm.
@@ -702,7 +702,7 @@ TEST_F(EngineSyncTest, RateChangeTestOrder3) {
     EXPECT_DOUBLE_EQ(
             120.0, ControlObject::get(ConfigKey(m_sGroup2, "file_bpm")));
 
-    // Turn on Leader. Even though it is explict leader, it still matches the other deck.
+    // Turn on Leader. Even though it is explicit leader, it still matches the other deck.
     auto pButtonLeaderSync1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
     pButtonLeaderSync1->set(static_cast<double>(SyncMode::LeaderExplicit));
@@ -847,10 +847,10 @@ TEST_F(EngineSyncTest, LeaderStopSliderCheck) {
 
     auto pButtonLeaderSync2 =
             std::make_unique<ControlProxy>(m_sGroup2, "sync_mode");
-    pButtonLeaderSync2->slotSet(static_cast<double>(SyncMode::Follower));
+    pButtonLeaderSync2->set(static_cast<double>(SyncMode::Follower));
     auto pButtonLeaderSync1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
-    pButtonLeaderSync1->slotSet(static_cast<double>(SyncMode::LeaderExplicit));
+    pButtonLeaderSync1->set(static_cast<double>(SyncMode::LeaderExplicit));
     ProcessBuffer();
 
     //EXPECT_TRUE(isExplicitLeader(m_sGroup1));
@@ -952,8 +952,8 @@ TEST_F(EngineSyncTest, MomentarySyncAlgorithmTwo) {
 
     auto pButtonSyncEnabled1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_enabled");
-    pButtonSyncEnabled1->slotSet(1.0);
-    pButtonSyncEnabled1->slotSet(0.0);
+    pButtonSyncEnabled1->set(1.0);
+    pButtonSyncEnabled1->set(0.0);
 
     ProcessBuffer();
 
@@ -1002,10 +1002,10 @@ TEST_F(EngineSyncTest, LoadTrackInitializesLeader) {
 
     auto pButtonSyncEnabled1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_enabled");
-    pButtonSyncEnabled1->slotSet(1.0);
+    pButtonSyncEnabled1->set(1.0);
 
     // No leader because this deck has no track.
-    EXPECT_EQ(NULL, m_pEngineSync->getLeaderChannel());
+    EXPECT_EQ(nullptr, m_pEngineSync->getLeaderChannel());
     EXPECT_DOUBLE_EQ(
             0.0, ControlObject::getControl(ConfigKey(m_sGroup1, "bpm"))->get());
 
@@ -1028,7 +1028,7 @@ TEST_F(EngineSyncTest, LoadTrackInitializesLeader) {
 
     auto pButtonSyncEnabled2 =
             std::make_unique<ControlProxy>(m_sGroup2, "sync_enabled");
-    pButtonSyncEnabled2->slotSet(1.0);
+    pButtonSyncEnabled2->set(1.0);
 
     m_pMixerDeck1->loadFakeTrack(false, 128.0);
 
@@ -1139,8 +1139,8 @@ TEST_F(EngineSyncTest, LoadTrackResetTempoOption) {
             ->set(getRateSliderValue(1.5));
     ControlObject::getControl(ConfigKey(m_sGroup2, "rate"))
             ->set(getRateSliderValue(1.5));
-    pButtonSyncEnabled1->slotSet(0.0);
-    pButtonSyncEnabled2->slotSet(0.0);
+    pButtonSyncEnabled1->set(0.0);
+    pButtonSyncEnabled2->set(0.0);
     track1 = m_pMixerDeck1->loadFakeTrack(false, 140.0);
     ControlObject::getControl(ConfigKey(m_sGroup1, "play"))->set(1.0);
     track2 = m_pMixerDeck2->loadFakeTrack(false, 128.0);
@@ -1162,7 +1162,7 @@ TEST_F(EngineSyncTest, EnableOneDeckSliderUpdates) {
             ->set(getRateSliderValue(1.0));
 
     // Set the deck to sync enabled.
-    pButtonSyncEnabled1->slotSet(1.0);
+    pButtonSyncEnabled1->set(1.0);
     ProcessBuffer();
 
     // Group 1 should now be leader (only one sync deck).
@@ -1437,7 +1437,7 @@ TEST_F(EngineSyncTest, ExplicitLeaderPostProcessed) {
     // channel gets post-processed.
     auto pButtonLeaderSync1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_mode");
-    pButtonLeaderSync1->slotSet(static_cast<double>(SyncMode::LeaderExplicit));
+    pButtonLeaderSync1->set(static_cast<double>(SyncMode::LeaderExplicit));
     mixxx::BeatsPointer pBeats1 = BeatFactory::makeBeatGrid(
             m_pTrack1->getSampleRate(), mixxx::Bpm(160), mixxx::audio::kStartFramePos);
     m_pTrack1->trySetBeats(pBeats1);
@@ -1839,10 +1839,10 @@ TEST_F(EngineSyncTest, HalfDoubleThenPlay) {
 
     auto pButtonSyncEnabled1 =
             std::make_unique<ControlProxy>(m_sGroup1, "sync_enabled");
-    pButtonSyncEnabled1->slotSet(1.0);
+    pButtonSyncEnabled1->set(1.0);
     auto pButtonSyncEnabled2 =
             std::make_unique<ControlProxy>(m_sGroup2, "sync_enabled");
-    pButtonSyncEnabled2->slotSet(1.0);
+    pButtonSyncEnabled2->set(1.0);
     ControlObject::getControl(ConfigKey(m_sGroup1, "quantize"))->set(1.0);
     ControlObject::getControl(ConfigKey(m_sGroup2, "quantize"))->set(1.0);
 
@@ -1900,11 +1900,11 @@ TEST_F(EngineSyncTest, HalfDoubleThenPlay) {
     // Sync only cares about which deck plays first now, enable order is irrelevant.
     ControlObject::getControl(ConfigKey(m_sGroup1, "play"))->set(0.0);
     ControlObject::getControl(ConfigKey(m_sGroup2, "play"))->set(0.0);
-    pButtonSyncEnabled1->slotSet(0.0);
-    pButtonSyncEnabled2->slotSet(0.0);
+    pButtonSyncEnabled1->set(0.0);
+    pButtonSyncEnabled2->set(0.0);
     ProcessBuffer();
-    pButtonSyncEnabled2->slotSet(1.0);
-    pButtonSyncEnabled1->slotSet(1.0);
+    pButtonSyncEnabled2->set(1.0);
+    pButtonSyncEnabled1->set(1.0);
     EXPECT_DOUBLE_EQ(0.5,
             m_pChannel1->getEngineBuffer()
                     ->m_pSyncControl->m_leaderBpmAdjustFactor);
