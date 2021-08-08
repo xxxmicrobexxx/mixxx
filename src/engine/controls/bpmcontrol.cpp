@@ -172,13 +172,16 @@ void BpmControl::adjustBeatsBpm(double deltaBpm) {
         return;
     }
     const mixxx::BeatsPointer pBeats = pTrack->getBeats();
-    if (pBeats && (pBeats->getCapabilities() & mixxx::Beats::BEATSCAP_SETBPM)) {
-        mixxx::Bpm bpm = pBeats->getBpm();
-        const auto centerBpm = mixxx::Bpm(math_max(kBpmAdjustMin, bpm.value() + deltaBpm));
-        mixxx::Bpm adjustedBpm = BeatUtils::roundBpmWithinRange(
-                centerBpm - kBpmAdjustStep / 2, centerBpm, centerBpm + kBpmAdjustStep / 2);
-        pTrack->trySetBeats(pBeats->setBpm(adjustedBpm));
+    if (!pBeats) {
+        return;
     }
+
+    mixxx::Bpm bpm = pBeats->getBpm();
+    // FIXME: calling bpm.value() without checking bpm.isValid()
+    const auto centerBpm = mixxx::Bpm(math_max(kBpmAdjustMin, bpm.value() + deltaBpm));
+    mixxx::Bpm adjustedBpm = BeatUtils::roundBpmWithinRange(
+            centerBpm - kBpmAdjustStep / 2, centerBpm, centerBpm + kBpmAdjustStep / 2);
+    pTrack->trySetBeats(pBeats->setBpm(adjustedBpm));
 }
 
 void BpmControl::slotAdjustBeatsFaster(double v) {
@@ -247,7 +250,7 @@ void BpmControl::slotTapFilter(double averageLength, int numSamples) {
         return;
     }
     const mixxx::BeatsPointer pBeats = pTrack->getBeats();
-    if (!pBeats || !(m_pBeats->getCapabilities() & mixxx::Beats::BEATSCAP_SETBPM)) {
+    if (!pBeats) {
         return;
     }
     double rateRatio = m_pRateRatio->get();
@@ -1003,11 +1006,6 @@ void BpmControl::slotUpdateRateSlider(double value) {
 
     double dRateRatio = m_pEngineBpm->get() / localBpm;
     m_pRateRatio->set(dRateRatio);
-}
-
-void BpmControl::notifySeek(double dNewPlaypos) {
-    EngineControl::notifySeek(dNewPlaypos);
-    updateBeatDistance();
 }
 
 // called from an engine worker thread

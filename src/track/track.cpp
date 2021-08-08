@@ -328,6 +328,16 @@ void Track::setReplayGain(const mixxx::ReplayGain& replayGain) {
     }
 }
 
+void Track::adjustReplayGainFromPregain(double gain) {
+    QMutexLocker lock(&m_qMutex);
+    mixxx::ReplayGain replayGain = m_record.getMetadata().getTrackInfo().getReplayGain();
+    replayGain.setRatio(gain * replayGain.getRatio());
+    if (compareAndSet(m_record.refMetadata().refTrackInfo().ptrReplayGain(), replayGain)) {
+        markDirtyAndUnlock(&lock);
+        emit replayGainAdjusted(replayGain);
+    }
+}
+
 mixxx::Bpm Track::getBpmWhileLocked() const {
     // BPM values must be synchronized at all times!
     DEBUG_ASSERT(m_record.getMetadata().getTrackInfo().getBpm() == getBeatsPointerBpm(m_pBeats));
@@ -349,8 +359,7 @@ bool Track::trySetBpmWhileLocked(mixxx::Bpm bpm) {
                 bpm,
                 cuePosition);
         return trySetBeatsWhileLocked(std::move(pBeats));
-    } else if ((m_pBeats->getCapabilities() & mixxx::Beats::BEATSCAP_SETBPM) &&
-            m_pBeats->getBpm() != bpm) {
+    } else if (m_pBeats->getBpm() != bpm) {
         // Continue with the regular cases
         if (kLogger.debugEnabled()) {
             kLogger.debug() << "Updating BPM:" << getLocation();
