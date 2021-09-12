@@ -2673,7 +2673,7 @@ TEST_F(EngineSyncTest, SeekStayInPhase) {
     EXPECT_DOUBLE_EQ(0.18925937554508981, ControlObject::get(ConfigKey(m_sGroup1, "playposition")));
 }
 
-TEST_F(EngineSyncTest, ScratchEndOtherPlayingTrackStayInPhase) {
+TEST_F(EngineSyncTest, ScratchEndOtherStoppedTrackStayInPhase) {
     // After scratching, confirm that we are still in phase.
     // This version tests with a stopped other track.
     mixxx::BeatsPointer pBeats1 =
@@ -2707,7 +2707,7 @@ TEST_F(EngineSyncTest, ScratchEndOtherPlayingTrackStayInPhase) {
             1e-8);
 }
 
-TEST_F(EngineSyncTest, ScratchEndOtherStoppedTrackStayInPhase) {
+TEST_F(EngineSyncTest, ScratchEndOtherPlayingTrackStayInPhase) {
     // After scratching, confirm that we are still in phase.
     // This version tests with a playing other track.
     mixxx::BeatsPointer pBeats1 =
