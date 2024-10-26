@@ -3503,4 +3503,25 @@
       </output>
     </outputs>
   </controller>
+  <control>
+    <group>[AutoDJ]</group>
+    <key>enabled</key>
+    <description>MIDI Learned from 3 messages.</description>
+    <status>0x90</status>
+    <midino>0x5A</midino>
+    <options>
+        <normal/>
+    </options>
+</control>
+  <control>
+    <group>[AutoDJ]</group>
+    <key>fade_now</key>
+    <description>MIDI Learned from 2 messages.</description>
+    <status>0x90</status>
+    <midino>0x28</midino>
+    <options>
+        <normal/>
+    </options>
+</control>
+ 
 </MixxxControllerPreset>
